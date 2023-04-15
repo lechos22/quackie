@@ -1,5 +1,8 @@
-CFLAGS=-Wall -Wextra -Werror -O3
+CFLAGS=-Wall -Wextra -Werror -O3 -g
 TMPDIR=/tmp/quackie
+DESTDIR:=/usr/local
+NAME=quackie
+VERSION=0.1.0
 
 all: dist/bin/quackie
 
@@ -7,37 +10,37 @@ run: dist/bin/quackie
 	./dist/bin/quackie
 
 install: dist/bin/quackie
-	@cp dist/bin/quackie /usr/local/bin/quackie
+	@cp dist/bin/quackie $(DESTDIR)/bin/quackie
 
 uninstall:
-	@rm /usr/local/bin/quackie
+	@rm $(DESTDIR)/bin/quackie
 
-package: quackie.tar.gz quackie.deb
+package: $(NAME)-$(VERSION).tar.gz $(NAME)-$(VERSION).deb
 
-quackie.tar.gz: dist/bin/quackie
+$(NAME)-$(VERSION).tar.gz: all
 	@mkdir -p $(TMPDIR)/tar
 	@cp -r dist/* $(TMPDIR)/tar
 	@find $(TMPDIR)/tar -type f -executable -exec strip {} \;
-	@tar -czf quackie.tar.gz -C $(TMPDIR)/tar .
+	@tar -czf $@ -C $(TMPDIR)/tar .
 
-quackie.deb: quackie.tar.gz
+$(NAME)-$(VERSION).deb: all
 	@mkdir -p $(TMPDIR)/deb/DEBIAN
 	@cp -r dist/* $(TMPDIR)/deb/
 	@find $(TMPDIR)/deb -type f -executable -exec strip {} \;
 	@echo "Package: quackie" > $(TMPDIR)/deb/DEBIAN/control
-	@echo "Version: 0.1" >> $(TMPDIR)/deb/DEBIAN/control
+	@echo "Version: $(VERSION)" >> $(TMPDIR)/deb/DEBIAN/control
 	@echo "Section: base" >> $(TMPDIR)/deb/DEBIAN/control
 	@echo "Priority: optional" >> $(TMPDIR)/deb/DEBIAN/control
 	@echo "Architecture: all" >> $(TMPDIR)/deb/DEBIAN/control
 	@echo "Depends: " >> $(TMPDIR)/deb/DEBIAN/control
 	@echo "Maintainer: lechos22" >> $(TMPDIR)/deb/DEBIAN/control
 	@echo "Description: Quackie" >> $(TMPDIR)/deb/DEBIAN/control
-	@dpkg-deb --build $(TMPDIR)/deb quackie.deb
+	@dpkg-deb --build $(TMPDIR)/deb $@
 
 OBJECTS = $(TMPDIR)/main.o
 
 clean:
-	@rm -rf $(TMPDIR) dist
+	@rm -rf $(TMPDIR) dist $(NAME)-$(VERSION).tar.gz $(NAME)-$(VERSION).deb
 
 $(TMPDIR)/%.o: src/%.c $(TMPDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
