@@ -10,7 +10,7 @@ run: dist/bin/quackie
 	./dist/bin/quackie
 
 install: dist/bin/quackie
-    install -Dm755 dist/bin/quackie $(DESTDIR)/bin/quackie
+	install -Dm755 dist/bin/quackie $(DESTDIR)/bin/quackie
 
 uninstall:
 	@rm $(DESTDIR)/bin/quackie
