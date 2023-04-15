@@ -1,6 +1,6 @@
 CFLAGS=-Wall -Wextra -Werror -O3 -g
 TMPDIR=/tmp/quackie
-DESTDIR:=/usr/local
+DESTDIR?=/usr/local
 NAME=quackie
 VERSION=0.1.0
 
