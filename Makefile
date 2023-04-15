@@ -1,6 +1,6 @@
 CFLAGS=-Wall -Wextra -Werror -O3 -g
 TMPDIR=/tmp/quackie
-DESTDIR?=/usr/local
+DESTDIR?=/
 NAME=quackie
 VERSION=0.1.0
 
@@ -10,7 +10,7 @@ run: dist/bin/quackie
 	./dist/bin/quackie
 
 install: dist/bin/quackie
-	install -Dm755 dist/bin/quackie $(DESTDIR)/bin/quackie
+	install -Dm755 dist/bin/quackie $(DESTDIR)/usr/bin/quackie
 
 uninstall:
 	@rm $(DESTDIR)/bin/quackie
