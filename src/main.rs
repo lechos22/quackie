@@ -1,5 +1,10 @@
+use pancurses::initscr;
+
 mod geometry;
 
 fn main() {
-    println!("Hello, world!");
+    let window = initscr();
+    window.erase();
+    window.printw("Hello, world!");
+    window.getch();
 }
