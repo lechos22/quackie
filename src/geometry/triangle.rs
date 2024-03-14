@@ -8,7 +8,7 @@ pub struct Triangle2D {
 }
 
 impl Triangle2D {
-    pub fn new(point_a: Point2D, point_b: Point2D, point_c: Point2D) -> Self {
+    pub const fn new(point_a: Point2D, point_b: Point2D, point_c: Point2D) -> Self {
         Self {
             point_a,
             point_b,
