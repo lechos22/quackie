@@ -32,3 +32,54 @@ impl Triangle2D {
 fn main() {
     println!("Hello, world!");
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_point_inside_triangle() {
+        let triangle = Triangle2D {
+            point_a: Point2D { x: 0.0, y: 0.0 },
+            point_b: Point2D { x: 4.0, y: 0.0 },
+            point_c: Point2D { x: 2.0, y: 4.0 },
+        };
+
+        // Test points inside the triangle
+        assert!(triangle.is_point_inside(&Point2D { x: 2.0, y: 1.0 }));
+        assert!(triangle.is_point_inside(&Point2D { x: 1.0, y: 1.0 }));
+        assert!(triangle.is_point_inside(&Point2D { x: 2.0, y: 2.0 }));
+        assert!(triangle.is_point_inside(&Point2D { x: 3.0, y: 1.0 }));
+    }
+
+    #[test]
+    fn test_point_outside_triangle() {
+        let triangle = Triangle2D {
+            point_a: Point2D { x: 0.0, y: 0.0 },
+            point_b: Point2D { x: 4.0, y: 0.0 },
+            point_c: Point2D { x: 2.0, y: 4.0 },
+        };
+
+        // Test points outside the triangle
+        assert!(!triangle.is_point_inside(&Point2D { x: 0.0, y: 5.0 }));
+        assert!(!triangle.is_point_inside(&Point2D { x: 6.0, y: 1.0 }));
+        assert!(!triangle.is_point_inside(&Point2D { x: -1.0, y: 0.0 }));
+        assert!(!triangle.is_point_inside(&Point2D { x: 2.0, y: -1.0 }));
+    }
+
+    #[test]
+    fn test_point_on_triangle_edges() {
+        let triangle = Triangle2D {
+            point_a: Point2D { x: 0.0, y: 0.0 },
+            point_b: Point2D { x: 4.0, y: 0.0 },
+            point_c: Point2D { x: 2.0, y: 4.0 },
+        };
+
+        // Test points on triangle edges
+        assert!(triangle.is_point_inside(&Point2D { x: 0.0, y: 0.0 }));
+        assert!(triangle.is_point_inside(&Point2D { x: 4.0, y: 0.0 }));
+        assert!(triangle.is_point_inside(&Point2D { x: 2.0, y: 4.0 }));
+        assert!(triangle.is_point_inside(&Point2D { x: 1.0, y: 2.0 }));
+        assert!(triangle.is_point_inside(&Point2D { x: 3.0, y: 2.0 }));
+    }
+}
