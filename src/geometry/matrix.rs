@@ -14,10 +14,6 @@ impl Matrix3D {
         Self { data }
     }
 
-    pub const fn identity() -> Self {
-        Self::new([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
-    }
-
     pub fn rotation(angle: f64) -> Self {
         let cosine = angle.cos();
         let sine = angle.sin();

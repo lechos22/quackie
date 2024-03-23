@@ -46,12 +46,8 @@ fn point_on_triangle_edges() {
     assert!(triangle.is_point_inside(&Vector2D::new(3.0, 2.0)));
 }
 
-#[test]
-fn identity_matrix() {
-    let identity = Matrix3D::identity();
-    let point = Vector2D::new(2.0, 3.0);
-    assert_eq!(identity * point, point);
-}
+pub const IDENTITY_MATRIX: Matrix3D =
+    Matrix3D::new([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]);
 
 #[test]
 fn rotation_matrix() {
@@ -76,14 +72,12 @@ fn transposition_matrix() {
 fn matrix_multiplication() {
     let rotation_matrix = Matrix3D::rotation(std::f64::consts::PI / 2.0);
     let transposition_matrix = Matrix3D::transposition(2.0, 3.0);
-    let identity_matrix = Matrix3D::identity();
 
     // Test associativity of matrix multiplication
-    let result1 = (rotation_matrix * transposition_matrix) * identity_matrix;
-    let result2 = rotation_matrix * (transposition_matrix * identity_matrix);
+    let result1 = (rotation_matrix * transposition_matrix) * IDENTITY_MATRIX;
+    let result2 = rotation_matrix * (transposition_matrix * IDENTITY_MATRIX);
     assert_eq!(result1, result2);
 }
-
 
 #[test]
 fn rotate_around() {
