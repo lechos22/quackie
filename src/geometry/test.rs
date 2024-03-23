@@ -1,7 +1,7 @@
 use super::*;
 
 #[test]
-fn test_point_inside_triangle() {
+fn point_inside_triangle() {
     let triangle = Triangle2D::new([
         Vector2D::new(0.0, 0.0),
         Vector2D::new(4.0, 0.0),
@@ -16,7 +16,7 @@ fn test_point_inside_triangle() {
 }
 
 #[test]
-fn test_point_outside_triangle() {
+fn point_outside_triangle() {
     let triangle = Triangle2D::new([
         Vector2D::new(0.0, 0.0),
         Vector2D::new(4.0, 0.0),
@@ -31,7 +31,7 @@ fn test_point_outside_triangle() {
 }
 
 #[test]
-fn test_point_on_triangle_edges() {
+fn point_on_triangle_edges() {
     let triangle = Triangle2D::new([
         Vector2D::new(0.0, 0.0),
         Vector2D::new(4.0, 0.0),
@@ -47,14 +47,14 @@ fn test_point_on_triangle_edges() {
 }
 
 #[test]
-fn test_identity_matrix() {
+fn identity_matrix() {
     let identity = Matrix3D::identity();
     let point = Vector2D::new(2.0, 3.0);
     assert_eq!(identity * point, point);
 }
 
 #[test]
-fn test_rotation_matrix() {
+fn rotation_matrix() {
     // Test rotation by 90 degrees (π/2 radians)
     let rotation_matrix = Matrix3D::rotation(std::f64::consts::PI / 2.0);
     let point = Vector2D::new(1.0, 0.0);
@@ -64,7 +64,7 @@ fn test_rotation_matrix() {
 }
 
 #[test]
-fn test_transposition_matrix() {
+fn transposition_matrix() {
     let transposition_matrix = Matrix3D::transposition(2.0, 3.0);
     let point = Vector2D::new(1.0, 1.0);
     let transposed_point = transposition_matrix * point;
@@ -73,7 +73,7 @@ fn test_transposition_matrix() {
 }
 
 #[test]
-fn test_matrix_multiplication() {
+fn matrix_multiplication() {
     let rotation_matrix = Matrix3D::rotation(std::f64::consts::PI / 2.0);
     let transposition_matrix = Matrix3D::transposition(2.0, 3.0);
     let identity_matrix = Matrix3D::identity();
