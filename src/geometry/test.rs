@@ -83,3 +83,13 @@ fn matrix_multiplication() {
     let result2 = rotation_matrix * (transposition_matrix * identity_matrix);
     assert_eq!(result1, result2);
 }
+
+
+#[test]
+fn rotate_around() {
+    let original_point = Vector2D::new(2.0, 1.0);
+    let relative_point = Vector2D::new(1.0, 1.0);
+    let rotated_point = original_point.rotate_around(relative_point, std::f64::consts::PI / 2.0);
+    let expected_point = Vector2D::new(1.0, 2.0);
+    assert_eq!(rotated_point, expected_point);
+}
