@@ -3,7 +3,7 @@ name = "quackie"
 version = "1.0.1"
 edition = "2021"
 description = "A duck for your terminal! 🦆"
-authors = ["lechos22"]
+authors = ["Lech Mazur"]
 license = "GPL-2.0"
 
 [dependencies]
