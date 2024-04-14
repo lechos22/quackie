@@ -1,6 +1,6 @@
 use std::ops::Mul;
 
-use super::Vector2D;
+use super::vector::Vector2D;
 
 type Matrix3DRow = [f64; 3];
 
@@ -48,5 +48,45 @@ impl Mul<Vector2D> for Matrix3D {
         let x = point.x * self.data[0][0] + point.y * self.data[0][1] + self.data[0][2];
         let y = point.x * self.data[1][0] + point.y * self.data[1][1] + self.data[1][2];
         Vector2D::new(x, y)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::geometry::vector::Vector2D;
+
+    use super::Matrix3D;
+
+    pub const IDENTITY_MATRIX: Matrix3D =
+        Matrix3D::new([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]]);
+
+    #[test]
+    fn rotation_matrix() {
+        // Test rotation by 90 degrees (π/2 radians)
+        let rotation_matrix = Matrix3D::rotation(std::f64::consts::PI / 2.0);
+        let point = Vector2D::new(1.0, 0.0);
+        let rotated_point = rotation_matrix * point;
+        assert!((rotated_point.x - 0.0).abs() < f64::EPSILON);
+        assert!((rotated_point.y - 1.0).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn transposition_matrix() {
+        let transposition_matrix = Matrix3D::transposition(2.0, 3.0);
+        let point = Vector2D::new(1.0, 1.0);
+        let transposed_point = transposition_matrix * point;
+        assert_eq!(transposed_point.x, 3.0);
+        assert_eq!(transposed_point.y, 4.0);
+    }
+
+    #[test]
+    fn matrix_multiplication() {
+        let rotation_matrix = Matrix3D::rotation(std::f64::consts::PI / 2.0);
+        let transposition_matrix = Matrix3D::transposition(2.0, 3.0);
+
+        // Test associativity of matrix multiplication
+        let result1 = (rotation_matrix * transposition_matrix) * IDENTITY_MATRIX;
+        let result2 = rotation_matrix * (transposition_matrix * IDENTITY_MATRIX);
+        assert_eq!(result1, result2);
     }
 }

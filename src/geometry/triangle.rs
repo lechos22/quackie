@@ -1,4 +1,4 @@
-use super::Vector2D;
+use super::vector::Vector2D;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Triangle2D {
@@ -44,3 +44,53 @@ impl Triangle2D {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use crate::geometry::{triangle::Triangle2D, vector::Vector2D};
+
+    #[test]
+    fn point_inside_triangle() {
+        let triangle = Triangle2D::new([
+            Vector2D::new(0.0, 0.0),
+            Vector2D::new(4.0, 0.0),
+            Vector2D::new(2.0, 4.0),
+        ]);
+
+        // Test points inside the triangle
+        assert!(triangle.is_point_inside(&Vector2D::new(2.0, 1.0)));
+        assert!(triangle.is_point_inside(&Vector2D::new(1.0, 1.0)));
+        assert!(triangle.is_point_inside(&Vector2D::new(2.0, 2.0)));
+        assert!(triangle.is_point_inside(&Vector2D::new(3.0, 1.0)));
+    }
+
+    #[test]
+    fn point_outside_triangle() {
+        let triangle = Triangle2D::new([
+            Vector2D::new(0.0, 0.0),
+            Vector2D::new(4.0, 0.0),
+            Vector2D::new(2.0, 4.0),
+        ]);
+
+        // Test points outside the triangle
+        assert!(!triangle.is_point_inside(&Vector2D::new(0.0, 5.0)));
+        assert!(!triangle.is_point_inside(&Vector2D::new(6.0, 1.0)));
+        assert!(!triangle.is_point_inside(&Vector2D::new(-1.0, 0.0)));
+        assert!(!triangle.is_point_inside(&Vector2D::new(2.0, -1.0)));
+    }
+
+    #[test]
+    fn point_on_triangle_edges() {
+        let triangle = Triangle2D::new([
+            Vector2D::new(0.0, 0.0),
+            Vector2D::new(4.0, 0.0),
+            Vector2D::new(2.0, 4.0),
+        ]);
+
+        // Test points on triangle edges
+        assert!(triangle.is_point_inside(&Vector2D::new(0.0, 0.0)));
+        assert!(triangle.is_point_inside(&Vector2D::new(4.0, 0.0)));
+        assert!(triangle.is_point_inside(&Vector2D::new(2.0, 4.0)));
+        assert!(triangle.is_point_inside(&Vector2D::new(1.0, 2.0)));
+        assert!(triangle.is_point_inside(&Vector2D::new(3.0, 2.0)));
+    }
+}

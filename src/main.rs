@@ -5,7 +5,7 @@ use std::{
 };
 
 use duck::{BASE_TRIANGLES, BEAK_TRIANGLE, EYE_TRIANGLE};
-use geometry::Vector2D;
+use geometry::vector::Vector2D;
 use pancurses::{initscr, COLOR_BLACK, COLOR_RED, COLOR_YELLOW};
 
 mod duck;

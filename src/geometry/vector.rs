@@ -1,4 +1,4 @@
-use super::Matrix3D;
+use super::matrix::Matrix3D;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Vector2D {
@@ -15,5 +15,20 @@ impl Vector2D {
         let rotate = Matrix3D::rotation(angle);
         let transpose_back = Matrix3D::transposition(relative_to.x, relative_to.y);
         transpose_back * rotate * transpose * self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::geometry::vector::Vector2D;
+
+    #[test]
+    fn rotate_around() {
+        let original_point = Vector2D::new(2.0, 1.0);
+        let relative_point = Vector2D::new(1.0, 1.0);
+        let rotated_point =
+            original_point.rotate_around(relative_point, std::f64::consts::PI / 2.0);
+        let expected_point = Vector2D::new(1.0, 2.0);
+        assert_eq!(rotated_point, expected_point);
     }
 }

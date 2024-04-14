@@ -1,4 +1,4 @@
-use crate::geometry::{Vector2D, Triangle2D};
+use crate::geometry::{triangle::Triangle2D, vector::Vector2D};
 
 pub const BASE_TRIANGLES: &[Triangle2D] = &[
     Triangle2D::new([
