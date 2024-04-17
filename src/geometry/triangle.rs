@@ -1,6 +1,6 @@
 use super::vector::Vector2D;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Default, Clone, Copy, PartialEq)]
 pub struct Triangle2D {
     pub points: [Vector2D; 3],
 }
@@ -16,6 +16,15 @@ impl Triangle2D {
         let t = self.calculate_t(point, area);
 
         self.is_barycentric_point_inside(s, t)
+    }
+
+    pub fn to_uv_point(&self, uv_triangle: &Self, point: &Vector2D) -> Vector2D {
+        let area = self.calculate_signed_area();
+        let s = self.calculate_s(point, area);
+        let t = self.calculate_t(point, area);
+        uv_triangle.points[0] * s
+            + uv_triangle.points[1] * t
+            + uv_triangle.points[2] * (1.0 - s - t)
     }
 
     fn calculate_s(&self, point: &Vector2D, area: f64) -> f64 {
@@ -41,6 +50,14 @@ impl Triangle2D {
             + self.points[0].y * (-self.points[1].x + self.points[2].x)
             + self.points[0].x * (self.points[1].y - self.points[2].y)
             + self.points[1].x * self.points[2].y)
+    }
+    
+    pub fn rotate_around(&self, relative_to: &Vector2D, angle: f64) -> Triangle2D {
+        Self { points: [
+            self.points[0].rotate_around(relative_to, angle),
+            self.points[1].rotate_around(relative_to, angle),
+            self.points[2].rotate_around(relative_to, angle),
+        ] }
     }
 }
 

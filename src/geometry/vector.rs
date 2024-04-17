@@ -1,6 +1,8 @@
+use std::ops::{Add, Mul};
+
 use super::matrix::Matrix3D;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Default, Clone, Copy, PartialEq)]
 pub struct Vector2D {
     pub x: f64,
     pub y: f64,
@@ -10,11 +12,33 @@ impl Vector2D {
     pub const fn new(x: f64, y: f64) -> Self {
         Self { x, y }
     }
-    pub fn rotate_around(self, relative_to: Self, angle: f64) -> Self {
+    pub fn rotate_around(self, relative_to: &Self, angle: f64) -> Self {
         let transpose = Matrix3D::transposition(-relative_to.x, -relative_to.y);
         let rotate = Matrix3D::rotation(angle);
         let transpose_back = Matrix3D::transposition(relative_to.x, relative_to.y);
         transpose_back * rotate * transpose * self
+    }
+}
+
+impl Add for Vector2D {
+    type Output = Vector2D;
+
+    fn add(self, rhs: Vector2D) -> Self::Output {
+        Self {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
+    }
+}
+
+impl Mul<f64> for Vector2D {
+    type Output = Vector2D;
+
+    fn mul(self, rhs: f64) -> Self::Output {
+        Self {
+            x: self.x * rhs,
+            y: self.y * rhs,
+        }
     }
 }
 
@@ -27,7 +51,7 @@ mod tests {
         let original_point = Vector2D::new(2.0, 1.0);
         let relative_point = Vector2D::new(1.0, 1.0);
         let rotated_point =
-            original_point.rotate_around(relative_point, std::f64::consts::PI / 2.0);
+            original_point.rotate_around(&relative_point, std::f64::consts::PI / 2.0);
         let expected_point = Vector2D::new(1.0, 2.0);
         assert_eq!(rotated_point, expected_point);
     }

@@ -1,21 +1,20 @@
 use std::{
     ops::Mul,
+    sync::{Arc, OnceLock},
     thread::sleep,
     time::{Duration, Instant},
 };
 
 use duck::{BASE_TRIANGLES, BEAK_TRIANGLE, EYE_TRIANGLE};
-use geometry::vector::Vector2D;
-use pancurses::{initscr, COLOR_BLACK, COLOR_RED, COLOR_YELLOW};
+use pancurses::{initscr, ColorPair, COLOR_BLACK, COLOR_RED, COLOR_WHITE, COLOR_YELLOW};
+use quackie::{
+    geometry::vector::Vector2D,
+    graphics::{
+        window_buffer::WindowBuffer, pixel_data::PixelData, textured_triangle::TexturedTriangle2D,
+    },
+};
 
 mod duck;
-mod geometry;
-
-#[repr(i16)]
-enum ColorPair {
-    Body = 1,
-    Beak = 2,
-}
 
 const MIDDLE: Vector2D = Vector2D::new(0.5, 0.5);
 const ROTATION_SPEED: f64 = 2.0;
@@ -25,9 +24,8 @@ fn main() {
     setup_pancurses();
     let time_reference = Instant::now();
     loop {
-        let (max_y, max_x) = window.get_max_yx();
         let rotate_by = calculate_rotation(time_reference);
-        draw_screen(max_y, max_x, rotate_by, &window);
+        draw_screen(rotate_by, &window);
         window.refresh();
         sleep(Duration::from_millis(10));
     }
@@ -36,37 +34,41 @@ fn main() {
 fn setup_pancurses() {
     pancurses::start_color();
     pancurses::curs_set(0);
-    pancurses::init_pair(ColorPair::Body as i16, COLOR_YELLOW, COLOR_BLACK);
-    pancurses::init_pair(ColorPair::Beak as i16, COLOR_RED, COLOR_BLACK);
+    pancurses::init_pair(0, COLOR_WHITE, COLOR_BLACK);
+    pancurses::init_pair(1, COLOR_YELLOW, COLOR_BLACK);
+    pancurses::init_pair(2, COLOR_RED, COLOR_BLACK);
 }
 
 fn calculate_rotation(time_reference: Instant) -> f64 {
     time_reference.elapsed().as_secs_f64().mul(-ROTATION_SPEED)
 }
 
-fn draw_screen(max_y: i32, max_x: i32, rotate_by: f64, window: &pancurses::Window) {
-    for y in (0..max_y).rev() {
-        for x in 0..max_x {
-            draw_pixel(x, max_x, y, max_y, rotate_by, window);
-        }
-    }
+const TRIANGLES: OnceLock<Arc<[TexturedTriangle2D]>> = OnceLock::new();
+
+fn build_triangles() -> Arc<[TexturedTriangle2D]> {
+    let mut triangles: Vec<TexturedTriangle2D> = BASE_TRIANGLES
+        .iter()
+        .map(|triangle| {
+            TexturedTriangle2D::unipixeled(*triangle, PixelData::new('#', ColorPair(1)))
+        })
+        .collect();
+    let beak_triangle =
+        TexturedTriangle2D::unipixeled(BEAK_TRIANGLE, PixelData::new('X', ColorPair(2)));
+    triangles.push(beak_triangle);
+    let eye_triangle =
+        TexturedTriangle2D::unipixeled(EYE_TRIANGLE, PixelData::new(' ', ColorPair(0)));
+    triangles.push(eye_triangle);
+    Arc::from(triangles)
 }
 
-fn draw_pixel(x: i32, max_x: i32, y: i32, max_y: i32, rotate_by: f64, window: &pancurses::Window) {
-    let current_point = Vector2D::new((x as f64) / (max_x as f64), (y as f64) / (max_y as f64));
-    let current_point_rotated = current_point.rotate_around(MIDDLE, rotate_by);
-    let inside_base = BASE_TRIANGLES
-        .into_iter()
-        .any(|triangle| triangle.is_point_inside(&current_point_rotated));
-    let inside_eye = EYE_TRIANGLE.is_point_inside(&current_point_rotated);
-    let inside_beak = BEAK_TRIANGLE.is_point_inside(&current_point_rotated);
-    if inside_beak {
-        window.color_set(ColorPair::Beak as i16);
-        window.mvaddch(y, x, '#');
-    } else if inside_base && !inside_eye {
-        window.color_set(ColorPair::Body as i16);
-        window.mvaddch(y, x, '#');
-    } else {
-        window.mvaddch(y, x, ' ');
-    }
+fn draw_screen(rotate_by: f64, window: &pancurses::Window) {
+    let mut buf = WindowBuffer::for_window(window, PixelData::new(' ', ColorPair(0)));
+    let triangles = TRIANGLES.get_or_init(build_triangles).clone();
+    buf.draw_triangles(
+        &triangles
+            .iter()
+            .map(|triangle| triangle.rotate_around(&MIDDLE, -rotate_by))
+            .collect::<Vec<_>>(),
+    );
+    buf.draw_screen(window);
 }
