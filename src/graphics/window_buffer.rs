@@ -5,7 +5,7 @@ use pancurses::Window;
 use crate::geometry::vector::Vector2D;
 
 use super::{
-    pixel_data::PixelData, postprocess::PostProcessShader,
+    geometry_buffer::GeometryBuffer, pixel_data::PixelData, postprocess::PostProcessShader,
     textured_triangle::TexturedTriangle2D,
 };
 
@@ -47,10 +47,11 @@ impl WindowBuffer {
             self.pixels[y * self.width + x] = pixel
         }
     }
-    pub fn draw_triangles(&mut self, triangles: &[TexturedTriangle2D]) {
+    pub fn draw_geometry(&mut self, geometry: &GeometryBuffer) {
         const THREADS: usize = 8;
         self.pixels = thread::scope(|scope| {
             let mut handles = Vec::with_capacity(THREADS);
+            let triangles = geometry.triangles();
             for thread_n in 0..THREADS {
                 let size = self.height * self.width;
                 let chunk = size / THREADS;
@@ -79,8 +80,8 @@ impl WindowBuffer {
         for n in range {
             let y = n / self.width;
             let x = n % self.width;
-            let relative_y = y as f64 / self.min_wh as f64 - self.dy;
-            let relative_x = (x as f64) * 0.5 / self.min_wh as f64 - self.dx;
+            let relative_y = y as f64 / self.min_wh - self.dy;
+            let relative_x = (x as f64) * 0.5 / self.min_wh - self.dx;
             let point = Vector2D::new(relative_x, relative_y);
             let mut broke = false;
             for triangle in triangles.iter().rev() {

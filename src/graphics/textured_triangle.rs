@@ -1,6 +1,6 @@
-use std::sync::Arc;
+use std::{ops::Mul, sync::Arc};
 
-use crate::geometry::{triangle::Triangle2D, vector::Vector2D};
+use crate::geometry::{matrix::Matrix3D, triangle::Triangle2D, vector::Vector2D};
 
 use super::{image_buffer::ImageBuffer, pixel_data::PixelData};
 
@@ -35,11 +35,13 @@ impl TexturedTriangle2D {
         let v = (uv.y.max(0.)) as usize;
         self.texture.get_pixel_at(u, v)
     }
-    pub fn rotate_around(&self, relative_to: &Vector2D, angle: f64) -> Self {
-        Self {
-            geometry: self.geometry.rotate_around(relative_to, angle),
-            uv_geometry: self.uv_geometry.clone(),
-            texture: self.texture.clone(),
-        }
+}
+
+impl Mul<TexturedTriangle2D> for Matrix3D {
+    type Output = TexturedTriangle2D;
+
+    fn mul(self, mut rhs: TexturedTriangle2D) -> Self::Output {
+        rhs.geometry = self * rhs.geometry;
+        rhs
     }
 }

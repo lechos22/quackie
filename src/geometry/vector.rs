@@ -1,7 +1,5 @@
 use std::ops::{Add, Mul};
 
-use super::matrix::Matrix3D;
-
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
 pub struct Vector2D {
     pub x: f64,
@@ -11,12 +9,6 @@ pub struct Vector2D {
 impl Vector2D {
     pub const fn new(x: f64, y: f64) -> Self {
         Self { x, y }
-    }
-    pub fn rotate_around(self, relative_to: &Self, angle: f64) -> Self {
-        let transpose = Matrix3D::transposition(-relative_to.x, -relative_to.y);
-        let rotate = Matrix3D::rotation(angle);
-        let transpose_back = Matrix3D::transposition(relative_to.x, relative_to.y);
-        transpose_back * rotate * transpose * self
     }
 }
 
@@ -39,20 +31,5 @@ impl Mul<f64> for Vector2D {
             x: self.x * rhs,
             y: self.y * rhs,
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::geometry::vector::Vector2D;
-
-    #[test]
-    fn rotate_around() {
-        let original_point = Vector2D::new(2.0, 1.0);
-        let relative_point = Vector2D::new(1.0, 1.0);
-        let rotated_point =
-            original_point.rotate_around(&relative_point, std::f64::consts::PI / 2.0);
-        let expected_point = Vector2D::new(1.0, 2.0);
-        assert_eq!(rotated_point, expected_point);
     }
 }

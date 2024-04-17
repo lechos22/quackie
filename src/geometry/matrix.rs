@@ -1,6 +1,6 @@
 use std::ops::Mul;
 
-use super::vector::Vector2D;
+use super::{triangle::Triangle2D, vector::Vector2D};
 
 type Matrix3DRow = [f64; 3];
 
@@ -28,6 +28,7 @@ impl Matrix3D {
 impl Mul for Matrix3D {
     type Output = Matrix3D;
 
+    #[allow(clippy::needless_range_loop)]
     fn mul(self, other: Matrix3D) -> Matrix3D {
         let mut result_data = [[0.0; 3]; 3];
         for i in 0..3 {
@@ -48,6 +49,17 @@ impl Mul<Vector2D> for Matrix3D {
         let x = point.x * self.data[0][0] + point.y * self.data[0][1] + self.data[0][2];
         let y = point.x * self.data[1][0] + point.y * self.data[1][1] + self.data[1][2];
         Vector2D::new(x, y)
+    }
+}
+
+impl Mul<Triangle2D> for Matrix3D {
+    type Output = Triangle2D;
+
+    fn mul(self, mut triangle: Triangle2D) -> Self::Output {
+        triangle.points[0] = self * triangle.points[0];
+        triangle.points[1] = self * triangle.points[1];
+        triangle.points[2] = self * triangle.points[2];
+        triangle
     }
 }
 

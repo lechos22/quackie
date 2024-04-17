@@ -10,16 +10,15 @@ use pancurses::{
     initscr, Attributes, ColorPair, COLOR_BLACK, COLOR_RED, COLOR_WHITE, COLOR_YELLOW,
 };
 use quackie::{
-    geometry::vector::Vector2D,
+    geometry::matrix::Matrix3D,
     graphics::{
-        pixel_data::PixelData, postprocess::antialias::Antialias,
+        geometry_buffer::GeometryBuffer, pixel_data::PixelData, postprocess::antialias::Antialias,
         textured_triangle::TexturedTriangle2D, window_buffer::WindowBuffer,
     },
 };
 
 mod duck;
 
-const MIDDLE: Vector2D = Vector2D::new(0.5, 0.5);
 const ROTATION_SPEED: f64 = 2.0;
 
 fn main() {
@@ -46,8 +45,6 @@ fn calculate_rotation(time_reference: Instant) -> f64 {
     time_reference.elapsed().as_secs_f64().mul(-ROTATION_SPEED)
 }
 
-const TRIANGLES: OnceLock<Arc<[TexturedTriangle2D]>> = OnceLock::new();
-
 fn build_triangles() -> Arc<[TexturedTriangle2D]> {
     let mut triangles: Vec<TexturedTriangle2D> = BASE_TRIANGLES
         .iter()
@@ -72,17 +69,19 @@ fn build_triangles() -> Arc<[TexturedTriangle2D]> {
 }
 
 fn draw_screen(rotate_by: f64, window: &pancurses::Window) {
-    let mut buf = WindowBuffer::for_window(
+    let mut window_buffer = WindowBuffer::for_window(
         window,
         PixelData::new(' ', Attributes::new() | ColorPair(0)),
     );
+    static TRIANGLES: OnceLock<Arc<[TexturedTriangle2D]>> = OnceLock::new();
     let triangles = TRIANGLES.get_or_init(build_triangles).clone();
-    buf.draw_triangles(
-        &triangles
-            .iter()
-            .map(|triangle| triangle.rotate_around(&MIDDLE, -rotate_by))
-            .collect::<Vec<_>>(),
+    let mut geometry_buffer = GeometryBuffer::new(triangles.to_vec());
+    geometry_buffer.transform(
+        Matrix3D::transposition(0.5, 0.5)
+            * Matrix3D::rotation(-rotate_by)
+            * Matrix3D::transposition(-0.5, -0.5),
     );
-    buf.post_process(&Antialias);
-    buf.draw_screen(window);
+    window_buffer.draw_geometry(&geometry_buffer);
+    window_buffer.post_process(&Antialias);
+    window_buffer.draw_screen(window);
 }

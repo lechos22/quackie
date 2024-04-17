@@ -51,14 +51,6 @@ impl Triangle2D {
             + self.points[0].x * (self.points[1].y - self.points[2].y)
             + self.points[1].x * self.points[2].y)
     }
-    
-    pub fn rotate_around(&self, relative_to: &Vector2D, angle: f64) -> Triangle2D {
-        Self { points: [
-            self.points[0].rotate_around(relative_to, angle),
-            self.points[1].rotate_around(relative_to, angle),
-            self.points[2].rotate_around(relative_to, angle),
-        ] }
-    }
 }
 
 #[cfg(test)]
