@@ -1,16 +1,16 @@
-use pancurses::ColorPair;
+use pancurses::Attributes;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct PixelData {
     character: char,
-    color_pair: ColorPair,
+    attributes: Attributes,
 }
 
 impl PixelData {
-    pub fn new(character: char, color_pair: ColorPair) -> Self {
+    pub fn new(character: char, attributes: Attributes) -> Self {
         Self {
             character,
-            color_pair,
+            attributes,
         }
     }
 
@@ -18,7 +18,7 @@ impl PixelData {
         self.character
     }
 
-    pub fn color_pair(&self) -> ColorPair {
-        self.color_pair
+    pub fn attributes(&self) -> Attributes {
+        self.attributes
     }
 }

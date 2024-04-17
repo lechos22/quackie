@@ -1,10 +1,13 @@
 use std::{ops::Range, thread};
 
-use pancurses::{Attributes, Window};
+use pancurses::Window;
 
 use crate::geometry::vector::Vector2D;
 
-use super::{pixel_data::PixelData, textured_triangle::TexturedTriangle2D};
+use super::{
+    pixel_data::PixelData, postprocess::PostProcessShader,
+    textured_triangle::TexturedTriangle2D,
+};
 
 pub struct WindowBuffer {
     width: usize,
@@ -93,6 +96,42 @@ impl WindowBuffer {
         }
         output
     }
+    pub fn post_process(&mut self, shader: &dyn PostProcessShader) {
+        const THREADS: usize = 8;
+        self.pixels = thread::scope(|scope| {
+            let mut handles = Vec::with_capacity(THREADS);
+            for thread_n in 0..THREADS {
+                let size = self.height * self.width;
+                let chunk = size / THREADS;
+                let self_ref = &self;
+                handles.push(scope.spawn(move || {
+                    self_ref.post_process_range(
+                        shader,
+                        (thread_n * chunk)..((thread_n + 1) * chunk).max(size),
+                    )
+                }));
+            }
+            let mut outputs = Vec::with_capacity(THREADS);
+            for handle in handles {
+                let result = handle.join().unwrap();
+                outputs.push(result);
+            }
+            outputs.concat()
+        });
+    }
+    pub fn post_process_range(
+        &self,
+        shader: &dyn PostProcessShader,
+        range: Range<usize>,
+    ) -> Vec<PixelData> {
+        let mut output = Vec::with_capacity(range.len());
+        for n in range {
+            let y = n / self.width;
+            let x = n % self.width;
+            output.push(shader.execute(self, x, y));
+        }
+        output
+    }
     pub fn get_pixel_at(&self, x: usize, y: usize) -> PixelData {
         if x >= self.width || y >= self.height {
             self.background
@@ -104,7 +143,7 @@ impl WindowBuffer {
         for y in (0..self.height).rev() {
             for x in 0..self.width {
                 let pixel = self.get_pixel_at(x, y);
-                window.attrset(Attributes::new() | pixel.color_pair());
+                window.attrset(pixel.attributes());
                 let (x_i32, y_i32) = (x as i32, y as i32);
                 window.mvaddch(y_i32, x_i32, pixel.character());
             }

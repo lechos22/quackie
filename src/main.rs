@@ -6,11 +6,14 @@ use std::{
 };
 
 use duck::{BASE_TRIANGLES, BEAK_TRIANGLE, EYE_TRIANGLE};
-use pancurses::{initscr, ColorPair, COLOR_BLACK, COLOR_RED, COLOR_WHITE, COLOR_YELLOW};
+use pancurses::{
+    initscr, Attributes, ColorPair, COLOR_BLACK, COLOR_RED, COLOR_WHITE, COLOR_YELLOW,
+};
 use quackie::{
     geometry::vector::Vector2D,
     graphics::{
-        window_buffer::WindowBuffer, pixel_data::PixelData, textured_triangle::TexturedTriangle2D,
+        pixel_data::PixelData, postprocess::antialias::Antialias,
+        textured_triangle::TexturedTriangle2D, window_buffer::WindowBuffer,
     },
 };
 
@@ -49,20 +52,30 @@ fn build_triangles() -> Arc<[TexturedTriangle2D]> {
     let mut triangles: Vec<TexturedTriangle2D> = BASE_TRIANGLES
         .iter()
         .map(|triangle| {
-            TexturedTriangle2D::unipixeled(*triangle, PixelData::new('#', ColorPair(1)))
+            TexturedTriangle2D::unipixeled(
+                *triangle,
+                PixelData::new('#', Attributes::new() | ColorPair(1)),
+            )
         })
         .collect();
-    let beak_triangle =
-        TexturedTriangle2D::unipixeled(BEAK_TRIANGLE, PixelData::new('X', ColorPair(2)));
+    let beak_triangle = TexturedTriangle2D::unipixeled(
+        BEAK_TRIANGLE,
+        PixelData::new('X', Attributes::new() | ColorPair(2)),
+    );
     triangles.push(beak_triangle);
-    let eye_triangle =
-        TexturedTriangle2D::unipixeled(EYE_TRIANGLE, PixelData::new(' ', ColorPair(0)));
+    let eye_triangle = TexturedTriangle2D::unipixeled(
+        EYE_TRIANGLE,
+        PixelData::new(' ', Attributes::new() | ColorPair(0)),
+    );
     triangles.push(eye_triangle);
     Arc::from(triangles)
 }
 
 fn draw_screen(rotate_by: f64, window: &pancurses::Window) {
-    let mut buf = WindowBuffer::for_window(window, PixelData::new(' ', ColorPair(0)));
+    let mut buf = WindowBuffer::for_window(
+        window,
+        PixelData::new(' ', Attributes::new() | ColorPair(0)),
+    );
     let triangles = TRIANGLES.get_or_init(build_triangles).clone();
     buf.draw_triangles(
         &triangles
@@ -70,5 +83,6 @@ fn draw_screen(rotate_by: f64, window: &pancurses::Window) {
             .map(|triangle| triangle.rotate_around(&MIDDLE, -rotate_by))
             .collect::<Vec<_>>(),
     );
+    buf.post_process(&Antialias);
     buf.draw_screen(window);
 }
