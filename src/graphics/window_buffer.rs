@@ -1,3 +1,5 @@
+use std::{ops::Range, thread};
+
 use pancurses::{Attributes, Window};
 
 use crate::geometry::vector::Vector2D;
@@ -43,19 +45,53 @@ impl WindowBuffer {
         }
     }
     pub fn draw_triangles(&mut self, triangles: &[TexturedTriangle2D]) {
-        for y in 0..self.height {
+        const THREADS: usize = 8;
+        self.pixels = thread::scope(|scope| {
+            let mut handles = Vec::with_capacity(THREADS);
+            for thread_n in 0..THREADS {
+                let size = self.height * self.width;
+                let chunk = size / THREADS;
+                let self_ref = &self;
+                handles.push(scope.spawn(move || {
+                    self_ref.render_range(
+                        triangles,
+                        (thread_n * chunk)..((thread_n + 1) * chunk).max(size),
+                    )
+                }));
+            }
+            let mut outputs = Vec::with_capacity(THREADS);
+            for handle in handles {
+                let result = handle.join().unwrap();
+                outputs.push(result);
+            }
+            outputs.concat()
+        });
+    }
+    fn render_range(
+        &self,
+        triangles: &[TexturedTriangle2D],
+        range: Range<usize>,
+    ) -> Vec<PixelData> {
+        let mut output = Vec::with_capacity(range.len());
+        for n in range {
+            let y = n / self.width;
+            let x = n % self.width;
             let relative_y = y as f64 / self.min_wh as f64 - self.dy;
-            for x in 0..self.width {
-                let relative_x = (x as f64) * 0.5 / self.min_wh as f64 - self.dx;
-                let point = Vector2D::new(relative_x, relative_y);
-                for triangle in triangles.iter().rev() {
-                    if triangle.is_point_inside(&point) {
-                        self.set_pixel_at(x, y, triangle.get_pixel_at(&point));
-                        break;
-                    }
+            let relative_x = (x as f64) * 0.5 / self.min_wh as f64 - self.dx;
+            let point = Vector2D::new(relative_x, relative_y);
+            let mut broke = false;
+            for triangle in triangles.iter().rev() {
+                if triangle.is_point_inside(&point) {
+                    output.push(triangle.get_pixel_at(&point));
+                    broke = true;
+                    break;
                 }
             }
+            if !broke {
+                output.push(self.background);
+            }
         }
+        output
     }
     pub fn get_pixel_at(&self, x: usize, y: usize) -> PixelData {
         if x >= self.width || y >= self.height {
