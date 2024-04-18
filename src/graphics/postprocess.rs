@@ -1,4 +1,5 @@
 pub mod antialias;
+pub mod outline;
 
 use super::{pixel_data::PixelData, window_buffer::WindowBuffer};
 
