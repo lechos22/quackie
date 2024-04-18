@@ -17,7 +17,7 @@ impl GeometryBuffer {
 
     pub fn transform(&mut self, matrix: Matrix3D) {
         for triangle in self.triangles.iter_mut() {
-            *triangle = matrix * triangle.clone();
+            triangle.transform(matrix);
         }
     }
 }

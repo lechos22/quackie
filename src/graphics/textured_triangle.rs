@@ -1,4 +1,4 @@
-use std::{ops::Mul, sync::Arc};
+use std::sync::Arc;
 
 use crate::geometry::{matrix::Matrix3D, triangle::Triangle2D, vector::Vector2D};
 
@@ -35,13 +35,7 @@ impl TexturedTriangle2D {
         let v = (uv.y.max(0.)) as usize;
         self.texture.get_pixel_at(u, v)
     }
-}
-
-impl Mul<TexturedTriangle2D> for Matrix3D {
-    type Output = TexturedTriangle2D;
-
-    fn mul(self, mut rhs: TexturedTriangle2D) -> Self::Output {
-        rhs.geometry = self * rhs.geometry;
-        rhs
+    pub fn transform(&mut self, matrix: Matrix3D) {
+        self.geometry = matrix * self.geometry;
     }
 }
