@@ -11,4 +11,5 @@ keywords = ["ascii-art"]
 categories = ["command-line-utilities"]
 
 [dependencies]
+clap = { version = "4.5.4", features = ["derive"] }
 pancurses = "0.17.0"
