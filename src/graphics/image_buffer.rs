@@ -2,6 +2,7 @@ use std::fmt::Debug;
 
 use super::pixel_data::PixelData;
 
+#[derive(Hash)]
 pub struct ImageBuffer {
     width: usize,
     height: usize,

@@ -10,6 +10,7 @@ use pancurses::{
     initscr, Attributes, ColorPair, COLOR_BLACK, COLOR_RED, COLOR_WHITE, COLOR_YELLOW,
 };
 use quackie::{
+    duckfile,
     geometry::matrix::Matrix3D,
     graphics::{
         geometry_buffer::GeometryBuffer,
@@ -21,7 +22,6 @@ use quackie::{
 };
 
 mod arguments;
-mod duck;
 
 fn postprocess_by_name(name: String) -> Option<Box<dyn PostProcessShader>> {
     match name.as_str() {
@@ -63,27 +63,7 @@ fn calculate_rotation(time_reference: Instant, rotation_speed: f64) -> f64 {
 }
 
 fn build_triangles() -> Arc<[TexturedTriangle2D]> {
-    use duck::{BASE_TRIANGLES, BEAK_TRIANGLE, EYE_TRIANGLE};
-    let mut triangles: Vec<TexturedTriangle2D> = BASE_TRIANGLES
-        .iter()
-        .map(|triangle| {
-            TexturedTriangle2D::unipixeled(
-                *triangle,
-                PixelData::new('#', Attributes::new() | ColorPair(1)),
-            )
-        })
-        .collect();
-    let beak_triangle = TexturedTriangle2D::unipixeled(
-        BEAK_TRIANGLE,
-        PixelData::new('#', Attributes::new() | ColorPair(2)),
-    );
-    triangles.push(beak_triangle);
-    let eye_triangle = TexturedTriangle2D::unipixeled(
-        EYE_TRIANGLE,
-        PixelData::new(' ', Attributes::new() | ColorPair(0)),
-    );
-    triangles.push(eye_triangle);
-    Arc::from(triangles)
+    Arc::from(duckfile::read_duckfile(include_str!("./duck.json")))
 }
 
 fn draw_screen(

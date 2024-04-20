@@ -1,6 +1,6 @@
 use pancurses::Attributes;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct PixelData {
     character: char,
     attributes: Attributes,

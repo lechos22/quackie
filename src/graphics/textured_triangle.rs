@@ -38,4 +38,16 @@ impl TexturedTriangle2D {
     pub fn transform(&mut self, matrix: Matrix3D) {
         self.geometry = matrix * self.geometry;
     }
+    
+    pub fn geometry(&self) -> Triangle2D {
+        self.geometry
+    }
+    
+    pub fn uv_geometry(&self) -> Triangle2D {
+        self.uv_geometry
+    }
+    
+    pub fn texture(&self) -> Arc<ImageBuffer> {
+        self.texture.clone()
+    }
 }
